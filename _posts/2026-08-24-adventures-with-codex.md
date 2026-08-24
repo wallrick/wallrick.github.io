@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Building an Agentic AI Workspace with Codex"
-date: 2026-08-24 12:00:00 -0000
+date: 2026-08-24 00:00:00 -0000
 categories: [agentic-ai, codex, software]
 tags: [codex, automation, containers, privacy]
 ---
