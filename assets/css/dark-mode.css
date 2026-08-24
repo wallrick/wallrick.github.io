@@ -1,0 +1,89 @@
+/* Shared palette variables let the toggle change the theme without rebuilding the site. */
+:root {
+  color-scheme: light;
+  --blog-background: #ffffff;
+  --blog-surface: #f8fafc;
+  --blog-text: #1f2937;
+  --blog-muted: #4b5563;
+  --blog-border: #d1d5db;
+  --blog-link: #2563eb;
+  --blog-code: #f3f4f6;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --blog-background: #111827;
+  --blog-surface: #1f2937;
+  --blog-text: #e5e7eb;
+  --blog-muted: #cbd5e1;
+  --blog-border: #4b5563;
+  --blog-link: #93c5fd;
+  --blog-code: #1f2937;
+}
+
+/* Override the Minima surfaces and text while retaining its existing layout. */
+body {
+  background: var(--blog-background);
+  color: var(--blog-text);
+}
+
+.site-header,
+.site-footer {
+  background: var(--blog-surface);
+  border-color: var(--blog-border);
+}
+
+.site-title,
+.site-nav .page-link,
+.post-link,
+a {
+  color: var(--blog-link);
+}
+
+.post-meta,
+.rss-subscribe,
+.footer-heading {
+  color: var(--blog-muted);
+}
+
+blockquote {
+  border-left-color: var(--blog-border);
+  color: var(--blog-muted);
+}
+
+code,
+pre {
+  background: var(--blog-code);
+  color: var(--blog-text);
+}
+
+hr {
+  border-color: var(--blog-border);
+}
+
+/* Keep the control visible beside the Minima navigation on wide and narrow screens. */
+.theme-toggle {
+  float: right;
+  margin: 15px 0 15px 12px;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--blog-border);
+  border-radius: 999px;
+  background: var(--blog-background);
+  color: var(--blog-text);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.4;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: var(--blog-link);
+  color: var(--blog-link);
+}
+
+@media screen and (max-width: 600px) {
+  .theme-toggle {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+}
