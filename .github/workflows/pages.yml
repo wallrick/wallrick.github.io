@@ -1,0 +1,56 @@
+name: Build and deploy Jekyll site
+
+on:
+  # Publish every committed blog change on the main branch.
+  push:
+    branches: [main]
+  # Allow a manual deployment from the Actions tab.
+  workflow_dispatch:
+
+# Grant only the permissions required to read the repository and deploy Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Keep one production deployment active and avoid cancelling a deployment in progress.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Check out the Markdown source and Jekyll configuration.
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Prepare the repository metadata used by the Pages deployment.
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # Build the Markdown posts and pages into the Pages artifact directory.
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      # Package only the generated site for the deployment job.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Publish the artifact prepared by the build job to GitHub Pages.
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

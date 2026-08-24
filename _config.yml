@@ -1,0 +1,10 @@
+# Central site metadata and the theme used by the GitHub Pages Jekyll build.
+title: Personal Blog
+description: Notes, projects, and ideas
+theme: minima
+plugins:
+  - jekyll-feed
+
+# User sites are served from the domain root, so links do not need a repository path.
+url: "https://wallrick.github.io"
+baseurl: ""
