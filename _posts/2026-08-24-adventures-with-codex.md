@@ -1,133 +1,129 @@
 ---
 layout: post
-title: "My Adventures with Codex"
+title: "Building an Agentic AI Workspace with Codex"
 date: 2026-08-24 12:00:00 -0000
-categories: [codex, software, personal]
-tags: [codex, github, automation]
+categories: [agentic-ai, codex, software]
+tags: [codex, automation, containers, privacy]
 ---
 
-I did not start using Codex with a grand plan. I had a nearly empty repository and
-a simple idea: turn it into a personal blog. I wanted to write posts in Markdown,
-keep everything in Git, and publish the result without taking on a large web
-application project.
+My interest in Codex started with the obvious question: how can I use it to write
+and change software more effectively? It did not take long to realize that the
+interesting part was not just the model or the chat window. The interesting part
+was the workspace around it.
 
-That small project became a useful introduction to a much bigger idea. Codex is
-most interesting to me when it is connected to the tools around the code: the
-repository, the terminal, GitHub, tests, branches, and pull requests. The chat is
-only one part of the experience. The real value comes from shortening the distance
-between an idea and a reviewed change.
+I have been building an agentic AI environment that lets Codex work with a real
+repository, a terminal, tools, browser automation, and persistent state. The goal
+is not to give an agent unlimited access and hope for the best. The goal is to make
+useful agency possible while keeping the system understandable, private, and easy
+to rebuild.
 
-## Starting with an empty repository
+## From chat to an agentic workspace
 
-My first useful decision was to ask Codex to inspect the repository before making
-recommendations. That sounds obvious, but it changes the quality of the work. A
-generic answer about blogging platforms is easy to produce. An answer based on the
-actual files, branch, and configuration is much more useful.
+A chat can answer a question. An agentic workspace can take a task, inspect the
+surrounding project, make a change, run checks, examine the result, and continue
+until it has something that can be reviewed. That difference is where the value
+starts to appear.
 
-The repository had almost nothing in it, so Jekyll was a natural fit. GitHub Pages
-already understands Jekyll, and Jekyll has a straightforward convention for blog
-posts: put Markdown files in `_posts/`, give them a date-based filename, and add a
-small YAML header describing the title, date, and layout.
+The agent needs more than a prompt. It needs context, tools, a place to work, and a
+way to preserve state. It also needs boundaries. If I cannot tell what the agent
+can access, what it changed, or what it is about to do next, then the system is
+hard to trust no matter how impressive the output looks.
 
-The first version needed only a configuration file, a home page, an About page, and
-a post. That was enough to create a working site without spending a week choosing
-frameworks, designing a component system, or building an administration panel.
+That led me to treat the project as infrastructure rather than as a collection of
+scripts. The container, network, volumes, browser connection, terminal, and model
+proxy all have a job to do. They need to work together, but they should not all
+have unrestricted access to one another.
 
-That was my first lesson: the smallest useful system is often the best place to
-learn. Once the site worked, I had something concrete to improve.
+## Putting Codex in a browser
 
-## Learning the development loop
+One of the most useful parts of the project is a browser-based way to reach Codex.
+The current approach uses GoTTY to expose a terminal session through a web
+interface. It is deliberately simple: the browser is a window into a persistent
+terminal environment rather than a separate application that tries to reproduce
+everything a terminal can do.
 
-I have found that Codex works best when I give it a clear outcome and enough
-context to make a sensible decision. I do not need to prescribe every command, but
-I do need to describe what success looks like.
+That choice has been helpful. I can use a familiar shell, see the same files that
+the agent sees, and keep the interaction close to the tools that actually perform
+the work. It also leaves room for a richer interface later. A future front end can
+show the current task, active tools, changed files, command output, approvals, and
+pull requests without throwing away the working terminal underneath.
 
-For this blog, that meant asking for Markdown authoring, a dated post structure, a
-GitHub Pages workflow, and a real deployment. Codex could then inspect the files,
-make the related changes, and validate the result. I could review the diff instead
-of trying to reconstruct a long sequence of instructions from memory.
+The web interface is therefore not just a convenience layer. It is part of the
+control surface for the agent. It should make the current state visible and make
+important transitions deliberate.
 
-The important part is that I still review the work. Codex can move quickly, but
-speed is not the same as correctness. I look at the files it changes, the commands
-it runs, and the result that GitHub produces. The repository gives me a durable
-record of that review: the diff shows what changed, the commit identifies the
-unit of work, and the pull request gives me a place to discuss whether the change
-is ready.
+## A proxy between the agent and the model
 
-Git became more than a backup. It became the memory of the collaboration.
+The environment also uses a local Headroom proxy around Codex. This gives the
+workspace a place to manage model traffic and local behavior without changing the
+way I use the Codex command itself.
 
-## The details behind a simple blog
+The proxy is colocated with Codex and stays on the local loopback interface. That
+keeps the path narrow and makes the boundary easier to reason about. The project
+also keeps telemetry and update behavior constrained so that the workspace does
+not quietly grow extra external dependencies.
 
-The blog itself taught me a few details that are easy to miss when reading a quick
-tutorial.
+This has changed how I think about agent tooling. A proxy is not only a performance
+or convenience feature. It is also a policy boundary. It is a place to decide what
+should remain local, what should be observable, and which integrations are allowed
+to communicate outside the workspace.
 
-There is a difference between a project site and a user site. A project site is
-usually served below a repository path, while a user site uses a repository named
-`<username>.github.io` and is served from the domain root. That distinction affects
-the Jekyll `baseurl` setting, links, feeds, and asset paths. Getting that decision
-right early prevents a surprising number of broken links later.
+## Tools need boundaries too
 
-I also chose a GitHub Actions workflow instead of relying only on an implicit
-branch build. The workflow checks out the repository, prepares Pages, builds the
-Jekyll site, uploads the generated artifact, and deploys it. Each step is visible in
-the Actions history. When something goes wrong, I can see whether the problem is
-in the source, the build, the artifact, or the deployment.
+The agentic part of the system comes from the tools. Codex can inspect files, work
+with Git, use the GitHub CLI, and interact with browser automation through a
+Playwright MCP connection. Those tools turn a conversation into a development
+loop.
 
-The first deployment exposed another useful lesson. The repository was initially
-private, and the account plan did not support Pages for a private repository. The
-workflow failed before it ever reached the Jekyll build. That was not a problem in
-the Markdown or the workflow; it was a hosting restriction. After I made the
-repository public, I enabled Pages and reran the workflow. The site built and the
-hello-world page appeared as expected.
+They also create responsibility. Browser automation is approval-gated and kept on
+the local connection. The private network uses Tailscale rather than exposing a
+set of development services to the public internet. The file browser is read-only
+and private. SSH is limited to local management with key-based access.
 
-It is a good reminder that a web project has at least two systems: the code that
-creates the site and the service that hosts it. Both need to be checked.
+These restrictions are not there because the tools are unhelpful. They are there
+because helpful tools can do more than I intended if their scope is vague. An
+agent should be able to do its job without being able to reach every service,
+modify every file, or publish every result automatically.
 
-## Building a web interface around Codex
+## Persistence is part of the design
 
-The next step I am working toward is a web interface for using Codex. I do not want
-to build another chat box with a send button and call it a development tool. The
-interesting problem is making the surrounding work visible and manageable.
+An agentic environment is frustrating if it forgets everything whenever a
+container is recreated. The project uses persistent named volumes for the
+workspace and Codex home so that authentication, configuration, Headroom state,
+and other working data survive the lifecycle of the container.
 
-The interface should show the repository, branch, current task, files in scope,
-recent actions, and the resulting diff. It should make the state of a job obvious:
-waiting for input, inspecting a repository, editing files, running validation,
-waiting for approval, or ready for review. A streamed response is useful, but a
-clear activity history is just as important.
+That persistence has to be handled carefully. It is useful to preserve state, but
+it is equally important to know what state exists and where it lives. The rebuild
+workflow keeps the configuration and startup logic in the repository while
+leaving credentials outside Git. Secrets are supplied through a sanitized
+environment contract and decoded only at runtime.
 
-I also want the interface to treat review as part of the normal workflow. A useful
-session should end with more than a paragraph of advice. It should be possible to
-see the branch, commit, checks, and pull request without leaving the context of the
-task. The goal is not to hide GitHub; it is to make the path from a request to a
-reviewable change easier to follow.
+This gives me a better balance than either extreme. The environment is not
+disposable, but it is still reproducible. I can preserve the parts that make the
+workspace useful and rebuild the parts that should remain managed by configuration.
 
-External actions deserve an explicit pause. Reading a repository is one thing.
-Pushing a branch, changing repository settings, publishing a site, or sending a
-message somewhere else is another. A good interface should show those boundaries
-and ask for approval at the right moment. That is not unnecessary friction. It is
-how a fast tool remains predictable.
+## What I have learned
 
-## What I have learned so far
+The first lesson is that agentic AI is mostly a systems problem. The model matters,
+but so do the filesystem, the network, the browser connection, the tool
+permissions, the logs, the volumes, and the recovery path.
 
-The first lesson is that context is a feature. Codex becomes more useful when it
-can see the repository and its constraints, rather than receiving an isolated
-question with no connection to the files that need to change.
+The second is that visibility is a feature. I want to know which repository and
+branch are active, which files changed, which commands ran, and whether the agent
+is waiting for approval. A good interface should make that information easy to
+find rather than hiding it behind a stream of conversational text.
 
-The second is that small, verifiable steps beat impressive one-shot prompts. Set up
-the site. Inspect the result. Configure deployment. Check the URL. Then move on to
-the next improvement. Each step creates evidence and makes mistakes easier to
-undo.
+The third is that guardrails make the system faster to use. When the boundaries are
+explicit, I spend less time worrying about accidental changes and more time
+working on the task. Private networking, read-only services, approval gates, and
+Git review are practical tools for maintaining that confidence.
 
-The third is that guardrails improve the experience. Privacy checks, explicit
-external actions, clean branches, and pull requests do not get in the way of
-productive work. They let me move faster because I know where the boundaries are.
+Finally, I have learned to think of Git as part of the agent's memory. A branch
+captures an experiment. A diff captures the exact change. A pull request captures
+the review. That makes it possible to let Codex move quickly while keeping the
+final decision with a person.
 
-Finally, I have learned that the best use of Codex is not to avoid understanding
-the system. It is to spend more of my time understanding the important parts. The
-agent can handle routine navigation and repetitive setup, while I focus on the
-decisions, the trade-offs, and whether the result is something I actually want to
-keep.
-
-This blog is a small project, but it has become a useful laboratory. I can try an
-idea, put the work in a branch, review the change, and publish only when it is
-ready. That is a good foundation for the next adventure.
+The project is still evolving. I expect the browser interface, tool integrations,
+and workflow around Codex to keep getting better. But the direction is clear: an
+agentic workspace should feel capable without feeling mysterious. It should make
+software work easier while making its own behavior easier to inspect.
