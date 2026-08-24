@@ -6,18 +6,17 @@ categories: [agentic-ai, codex, software]
 tags: [codex, automation, containers, privacy]
 ---
 
-My interest in Codex started with the obvious question: how can I use it to write
-and iterate on software development more effectively? It did not take long to realize that the
-interesting part was not just the local desktop codex. The interesting part
-was the workspace around it, how to get it off my laptop, lock down what it has access to but provide an expandable set of tools as needed.
-
-
+My interest in Codex started with a simple question: how can I use it to write and
+iterate on software more effectively? It did not take long to realize that the
+interesting part was not just the local desktop version of Codex. The interesting
+part was the workspace around it: how to move it off my laptop, lock down what it
+can access, and still provide an expandable set of tools as needed.
 
 I have been building an agentic AI environment that lets Codex work with a real
 repository, a terminal, tools, browser automation, and persistent state. The goal
 is not to give an agent unlimited access and hope for the best. The goal is to make
-useful AI agent loop possible while keeping the system understandable, private, and easy
-to rebuild.
+a useful AI-agent loop possible while keeping the system understandable, private,
+and easy to rebuild.
 
 ## From chat to an agentic workspace
 
@@ -39,9 +38,10 @@ have unrestricted access to one another.
 ## Putting Codex in a browser
 
 One of the most useful parts of the project is a browser-based way to reach Codex.
-The current approach uses GoTTY to expose a tmux session into a running codex through a secure web
-interface. It is deliberately simple: the browser is a window into a persistent
-terminal environment, running in my home lab, can be reconnected to at any time, codex sessions run in a recoverable tmux session.
+The current approach uses GoTTY to expose a tmux session to a running Codex process
+through a secure web interface. It is deliberately simple: the browser is a window
+into a persistent terminal environment running in my home lab. I can reconnect to
+it at any time, and Codex sessions run in recoverable tmux sessions.
 
 That choice has been helpful. I can use a familiar shell, see the same files that
 the agent sees, and keep the interaction close to the tools that actually perform
@@ -49,7 +49,9 @@ the work. It also leaves room for a richer interface later. A future front end c
 show the current task, active tools, changed files, command output, approvals, and
 pull requests without throwing away the working terminal underneath.
 
-Bringing in Tailscale allows me to connect to codex from anywhere, even outside my home lab.  I have now centralized codex, got it away from my sensitive personal files but given it a structured, reproducible environment with docker compose.  
+Bringing in Tailscale lets me connect to Codex from anywhere, even outside my home
+lab. I have centralized Codex, moved it away from my sensitive personal files, and
+given it a structured, reproducible environment managed with Docker Compose.
 
 ## Tools need boundaries too
 
@@ -76,7 +78,8 @@ permissions, the logs, the volumes, and the recovery path.
 
 The second is that visibility is a feature. I want to know which repository and
 branch are active, which files changed, which commands ran, and whether the agent
-is waiting for approval. This happens by elevating the codex into a browser session, accessible over a secure connection and accessible from anywhere.
+is waiting for approval. For me, that means elevating Codex into a browser session
+that is available over a secure connection from anywhere.
 
 The third is that guardrails make the system faster to use. When the boundaries are
 explicit, I spend less time worrying about accidental changes and more time
@@ -93,4 +96,6 @@ and workflow around Codex to keep getting better. But the direction is clear: an
 agentic workspace should feel capable without feeling mysterious. It should make
 software work easier while making its own behavior easier to inspect.
 
-At some point I might make public my Agentic AI setup that is well defined in a docker compose file with custom docker images.  I'll post a separate blog post detailing more about it once I am ready to share it.
+At some point, I may make my agentic-AI setup public. It is defined in a Docker
+Compose file with custom Docker images. I will write a separate post with more
+detail once I am ready to share it.
